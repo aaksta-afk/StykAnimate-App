@@ -29,6 +29,7 @@ import {segmentPaint, parseColor, hexColor, backgroundPaint, paintBackground, pa
 import {resolveInstanceFigure, polygonIdentity} from './animation-style.mjs';
 import { applicationMenuItems } from "./application-menu.mjs";
 import { Editor } from "./editor.mjs";
+import {installAIAnimationUI} from "./ai-animation-ui.mjs";
 import { createRenderer,worldToScreen,screenToWorld } from "./renderer.mjs";
 import {DrawingController} from './drawing-controller.mjs';
 import { ROW as TIMELINE_ROW, HEADER as TIMELINE_RULER } from "./layer-timeline.mjs";
@@ -5158,6 +5159,23 @@ const home = createHome({
   focusStage: () => viewport.focus({ preventScroll: true }),
   settings: () => editorSettings, tutorials: () => tutorials, studio: () => studioShell,
   startupView: desktop?.startupView ?? window.stykStartupView,
+});
+// An AI request creates a separate editable project. Existing work goes through
+// the same settle/save path as ordinary File > Open, never through direct replacement.
+installAIAnimationUI({
+  apiToken: desktop?.apiToken || '',
+  openDocument: async (report, name) => {
+    pause();
+    const opened = await openProject(session => editor.loadAsync(report, name, session));
+    if (opened) {
+      home.before('new');
+      setTool('select');
+      updateTitle();
+      requestRender();
+      queueUI();
+    }
+    return opened;
+  },
 });
 // The tutorials (src/tutorials/tutorials.mjs, docs/TUTORIALS.md): guided steps in the editor itself, on a practice animation.
 const tutorials = createTutorials({
