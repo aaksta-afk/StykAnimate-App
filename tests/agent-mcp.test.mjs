@@ -3,8 +3,6 @@ import assert from 'node:assert/strict';
 import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {createRequire} from 'node:module';
-const require = createRequire(import.meta.url);
 
 const temp = await mkdtemp(path.join(os.tmpdir(),'styk-agent-test-'));
 process.env.STYK_AGENT_DIR=temp;
