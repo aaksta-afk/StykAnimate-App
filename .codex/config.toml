@@ -1,0 +1,4 @@
+# Project-scoped MCP configuration. Codex needs to trust this workspace.
+[mcp_servers.stykanimate]
+command = "node"
+args = ["scripts/styk-mcp.mjs"]
