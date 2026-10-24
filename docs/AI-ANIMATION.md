@@ -1,77 +1,107 @@
-# AI Animation — editable keyframes from ChatGPT or Claude
+# Local AI agents: Claude Code, Codex and Antigravity
 
-This feature belongs to the **aaksta-afk/StykAnimate-App fork**. It is not part of the upstream official application.
+This fork's **StykAnimate MCP server** lets any of these local coding agents create and revise **editable stick-figure animations** without a separate OpenAI/Anthropic API key. The *agent client* (Claude Code, Codex or Antigravity) supplies language understanding; the local Node server builds native project files deterministically.
 
-## Setup
+There is no model call, API key, credential storage, project upload or internet request inside the MCP server.
 
-In the repository, install the normal app dependencies (see README) and launch from a terminal that has an API key set **before** launch.
+## Requirements
 
-For OpenAI:
+- Clone this fork and check out the branch containing this feature.
+- Install Node.js 22 or later.
+- Open the **StykAnimate-App repository root** as the agent workspace. If it is not the workspace root, adjust the MCP server's file path to an absolute path in the agent configuration.
+- Run the editor with \`npm ci\` and then \`npm start\` (desktop), or \`npm run serve\` (local browser). The MCP server itself has **no npm dependency** and can start with \`node scripts/styk-mcp.mjs\`.
 
-```sh
-export OPENAI_API_KEY="your-api-key"
-npm run serve
-```
+## Connecting the agent
 
-For Anthropic:
+This repository includes local MCP configuration files:
 
-```sh
-export ANTHROPIC_API_KEY="your-api-key"
-npm run serve
-```
+| Agent | File in this repository | How to check |
+| --- | --- | --- |
+| Claude Code | \`.mcp.json\` | Open Claude Code in this repo, approve the project MCP server when asked, check \`/mcp\` |
+| Codex CLI / extension | \`.codex/config.toml\` | Trust the repo, then run \`codex mcp list\` |
+| Google Antigravity | \`.agents/mcp_config.json\` | Open Antigravity on the repo, look at MCP Servers / \`/mcp\` |
 
-Windows PowerShell equivalents:
+Some client installations require a manual, **absolute-path** registration; use one of these alternatives if the project-local configuration does not load:
 
-```powershell
-$env:OPENAI_API_KEY="your-api-key"
-npm run serve
-```
+**Claude Code**, from this repository:
 
-or `$env:ANTHROPIC_API_KEY="your-api-key"`. To use the desktop application instead, run `npm start` from the same environment. Do not put keys in Git, frontend code, saved projects, or screenshots.
+\`\`\`sh
+claude mcp add --scope local stykanimate -- node /ABSOLUTE/PATH/TO/StykAnimate-App/scripts/styk-mcp.mjs
+\`\`\`
 
-Optional model override: `STYK_OPENAI_MODEL` (default `gpt-4o-mini`) and `STYK_ANTHROPIC_MODEL` (default `claude-sonnet-4-5`).
+**Codex CLI**:
 
-Click **AI Animation** in the top toolbar; choose a provider; describe the motion; click **Generate animation**. The app opens a **new, editable project** (existing unsaved work is protected by the normal project transition). Inspect and edit poses/keyframes before exporting video.
+\`\`\`sh
+codex mcp add stykanimate -- node /ABSOLUTE/PATH/TO/StykAnimate-App/scripts/styk-mcp.mjs
+codex mcp list
+\`\`\`
 
-**Important:** The assistant's ChatGPT/Claude subscription is not equivalent to API credits. Provider API usage requires a separately provisioned API key, account access, and may incur charges.
+**Antigravity** raw custom MCP configuration (replace the path before using):
 
-Only your entered prompt is sent to the selected external provider. The native project, other tabs and assets stay local. The proxy runs on the loopback Python codec host, checks the existing desktop token, bounds inputs and output, and uses only official provider endpoints. The browser's independently deployed/offline build has no built-in AI provider backend; use the JSON option or run the local server.
-
-## Paste storyboard JSON without an API key
-
-Ask ChatGPT or Claude for JSON with these constraints, then select **Or paste a storyboard JSON** in AI Animation:
-
-```json
+\`\`\`json
 {
-  "title": "Two fighters",
+  "mcpServers": {
+    "stykanimate": {
+      "command": "node",
+      "args": ["/ABSOLUTE/PATH/TO/StykAnimate-App/scripts/styk-mcp.mjs"]
+    }
+  }
+}
+\`\`\`
+
+In Antigravity IDE, use **MCP Servers > Manage MCP Servers > View raw config**. In the CLI, workspace configuration is \`.agents/mcp_config.json\`. The location and UI can vary by client release.
+
+On Windows, provide an absolute Windows path such as \`C:\\Users\\you\\StykAnimate-App\\scripts\\styk-mcp.mjs\`. Use \`node\` from the PATH; if it is not found, replace it with your installed \`node.exe\` absolute path.
+
+## Workflow
+
+Tell Claude Code / Codex / Antigravity:
+
+> Use the StykAnimate MCP tools to create a smooth 8-second 24-FPS animation of two stick figures fighting. One runs toward the other, jumps, kicks, gets blocked, and receives a counterpunch. Make it editable and give me the .styk project path.
+
+The agent should:
+1. Call \`animation_guide\` to see the permitted poses, keyframes, coordinate system and example.
+2. Plan the choreography, choose enough keyframes, then call \`create_animation\` with a structured storyboard.
+3. Return a new file path such as \`.styk-agent/animations/two-fighters-a1b2c3d4.styk\`.
+4. You open **File > Open** in StykAnimate and select that \`.styk\` file.
+5. For revisions, say "Move the kick 80px to the left" or "Add a jump before the last keyframe." The agent calls \`read_animation\`, \`edit_keyframe\`, \`append_keyframe\` or \`replace_animation\`, then you **reopen the .styk file** in StykAnimate to see the modified project.
+
+The generated \`.styk\` file is intentionally stored in the legacy **JSON native project representation** which StykAnimate can read, even though its normal Save operation converts it to a compressed native container.
+
+Output projects and original storyboards are kept under **\`.styk-agent/animations/\`** in the repository. This directory is gitignored to avoid accidentally committing personal animation assets. You can override it with the \`STYK_AGENT_DIR\` environment variable in the MCP process.
+
+## MCP tools
+
+- \`animation_guide\`: keyframe coordinate system, permitted poses and example.
+- \`create_animation\`: new editable .styk file; never overwrites an existing animation.
+- \`list_animations\`: list generated projects.
+- \`read_animation\`: get the current keyframe source JSON.
+- \`replace_animation\`: rewrite an existing animation's full storyboard.
+- \`edit_keyframe\`: replace a specified keyframe with position, pose and duration.
+- \`append_keyframe\`: extend an animation by adding a new keyframe.
+
+A storyboard has 2–80 keyframes, one or two actors, 1–60 FPS, and at most 1,800 timeline ticks. Current rig poses are \`idle\`, \`walk1\`, \`walk2\`, \`run1\`, \`run2\`, \`punch\`, \`kick\`, \`block\`, \`jump\`, \`crouch\` and \`fall\`. Agents can also supply custom joint angles. This is a **simple articulated animation pipeline**, not a text-to-video diffusion model or realistic motion-capture system.
+
+## Alternative: paste JSON directly into StykAnimate
+
+The app also exposes **Agent Import** in the top bar. This lets you paste storyboard JSON generated in an agent chat, without first creating a file. Example:
+
+\`\`\`json
+{
+  "title": "Jump and kick",
   "fps": 24,
   "frames": [
-    {"duration": 12, "actors": [
-      {"id": 1, "x": 270, "y": 300, "pose": "idle", "facing": 1},
-      {"id": 2, "x": 660, "y": 300, "pose": "block", "facing": -1}
-    ]},
-    {"duration": 10, "actors": [
-      {"id": 1, "x": 425, "y": 275, "pose": "jump", "facing": 1},
-      {"id": 2, "x": 660, "y": 300, "pose": "block", "facing": -1}
-    ]},
-    {"duration": 1, "actors": [
-      {"id": 1, "x": 480, "y": 300, "pose": "kick", "facing": 1},
-      {"id": 2, "x": 660, "y": 300, "pose": "fall", "facing": -1}
-    ]}
+    {"duration": 12, "actors": [{"id": 1, "x": 250, "y": 300, "pose": "idle", "facing": 1}]},
+    {"duration": 8, "actors": [{"id": 1, "x": 380, "y": 270, "pose": "jump", "facing": 1}]},
+    {"duration": 1, "actors": [{"id": 1, "x": 490, "y": 300, "pose": "kick", "facing": 1}]}
   ]
 }
-```
+\`\`\`
 
-Each frame is a **keyframe**, not a rendered frame. `duration` is a number of ticks until the next key; the last key is held for one tick. Poses: `idle`, `walk1`, `walk2`, `run1`, `run2`, `punch`, `kick`, `block`, `jump`, `crouch`, `fall`. Actor IDs are 1 and 2. Each actor has an `x`/`y` hip position within a 960×540 stage and a facing direction (+1 or -1).
+## Limits and safety
 
-Optional `angles` may contain exactly ten finite segment angles in radians, overriding a preset; these are for expert usage. Automatic interpolation is linear. The adapter supports at most 80 keyframes, two actors, 1800 total ticks, and 1–60 FPS. The scene is currently designed for **simple stick-figure choreography**, not AI video/image generation, lip sync, multi-layer VFX, or complex physical simulation.
-
-## Developer notes
-
-- `backend/ai_animation.py`: provider HTTP requests, validation, fixed official endpoints, bound response bytes and timeout. No API key ever reaches the renderer.
-- `backend/server.py`: authenticated `POST /api/ai/animate` endpoint.
-- `src/ai-animation.mjs`: pure storyboard validation and editable native report construction.
-- `src/ai-animation-ui.mjs`: prompt dialog, local service call, and pasted JSON fallback.
-- `src/app.mjs`: opens a new tab using `openProject` and `editor.loadAsync`.
-
-Run `node --test tests/ai-animation.test.mjs` and `python -m unittest discover -s backend -p "test_ai_animation.py"`. Live API calls are not part of automated tests and must be tested separately with your own provider credentials. An offline/browser build can use JSON import but not direct provider generation.
+- This MCP server **edits project files**, not the live stage of an already running editor. It does not move on-screen limbs in real time or reload open projects automatically.
+- To update an animation already open in StykAnimate, save your manual edits first, then reopen the agent-generated project. An agent edit rewrites that generated project and may replace manual changes to that same file; there is no automatic merge.
+- The server only reads/writes its configured output directory, validates storyboard data and rejects path traversal identifiers.
+- Agents can create/delete files using their *own* unrelated filesystem tools depending on permission settings; only the MCP tools described here are restricted.
+- Tests: \`node --test tests/ai-animation.test.mjs tests/agent-mcp.test.mjs\`. The normal project checks also cover the included tests. No live agent-client handshake was verified from this environment.
