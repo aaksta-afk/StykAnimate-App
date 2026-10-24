@@ -5160,10 +5160,9 @@ const home = createHome({
   settings: () => editorSettings, tutorials: () => tutorials, studio: () => studioShell,
   startupView: desktop?.startupView ?? window.stykStartupView,
 });
-// An AI request creates a separate editable project. Existing work goes through
-// the same settle/save path as ordinary File > Open, never through direct replacement.
+// A pasted local-agent storyboard creates a separate editable project. Existing
+// work uses the same settle/save path as ordinary File > Open.
 installAIAnimationUI({
-  apiToken: desktop?.apiToken || '',
   openDocument: async (report, name) => {
     pause();
     const opened = await openProject(session => editor.loadAsync(report, name, session));
