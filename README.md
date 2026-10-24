@@ -28,6 +28,10 @@
 
 Everything (decoding, editing, saving and rendering) runs locally. Optional, consent-based diagnostics are described in [docs/telemetry.md](docs/telemetry.md).
 
+## AI Animation (this fork)
+
+This fork adds an **AI Animation** toolbar action for OpenAI/Claude prompt-to-editable-stick-figure keyframes, plus a JSON storyboard paste option. A local API key and server are required for direct AI generation. See [AI Animation setup and limitations](docs/AI-ANIMATION.md). This capability is not in the upstream official release.
+
 ## Get StykAnimate
 
 - **Windows and Linux:** download Setup, Portable or the AppImage from the [releases page](https://github.com/filippocalippo/styk-animate-releases/releases/latest). Installed apps update themselves.
