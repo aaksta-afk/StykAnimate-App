@@ -28,9 +28,11 @@
 
 Everything (decoding, editing, saving and rendering) runs locally. Optional, consent-based diagnostics are described in [docs/telemetry.md](docs/telemetry.md).
 
-## AI Animation (this fork)
+## Local AI coding agents (this fork)
 
-This fork adds an **AI Animation** toolbar action for OpenAI/Claude prompt-to-editable-stick-figure keyframes, plus a JSON storyboard paste option. A local API key and server are required for direct AI generation. See [AI Animation setup and limitations](docs/AI-ANIMATION.md). This capability is not in the upstream official release.
+This fork includes **one local MCP server** for **Claude Code, Codex and Antigravity**, letting any of them create and edit native stick-figure keyframe project files **without extra provider API keys**. Generated `.styk` projects open in the editor and remain fully editable. It also has an optional **Agent Import** JSON dialog.
+
+See [the local MCP setup and usage guide](docs/AI-ANIMATION.md). This integration is in this fork, not the upstream official app. It writes files; live in-editor limb control is not yet implemented.
 
 ## Get StykAnimate
 
