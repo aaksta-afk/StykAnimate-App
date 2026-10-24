@@ -9,6 +9,7 @@ modified. Run ``python backend/server.py --port 47831`` from the app directory.
 from __future__ import annotations
 
 import argparse
+import ai_animation
 from collections import OrderedDict
 from dataclasses import dataclass
 import hashlib
@@ -1013,6 +1014,14 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self._check_request()
             parsed = urlsplit(self.path)
+            if parsed.path == "/api/ai/animate":
+                try:
+                    request = decoded_json(self._body(16384))
+                    result = ai_animation.generate_storyboard(request)
+                except ai_animation.AIAnimationError as exc:
+                    raise ApiError(exc.status, exc.code, str(exc)) from None
+                self._json(200, {"ok": True, "storyboard": result})
+                return
             if parsed.path == "/api/cancel":
                 self._body(0)
                 self.server.jobs.cancel(parse_qs(parsed.query).get("id", [""])[0])
