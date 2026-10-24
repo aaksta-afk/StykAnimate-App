@@ -9,7 +9,6 @@ modified. Run ``python backend/server.py --port 47831`` from the app directory.
 from __future__ import annotations
 
 import argparse
-import ai_animation
 from collections import OrderedDict
 from dataclasses import dataclass
 import hashlib
@@ -1014,18 +1013,6 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self._check_request()
             parsed = urlsplit(self.path)
-            if parsed.path == "/api/ai/animate":
-                # A different loopback site must not spend this process's API credits.
-                origin = self.headers.get("Origin", "")
-                if not origin or urlsplit(origin).netloc.lower() != self.headers.get("Host", "").lower():
-                    raise ApiError(403, "ai_origin_forbidden", "AI generation requires the editor origin.")
-                try:
-                    request = decoded_json(self._body(16384))
-                    result = ai_animation.generate_storyboard(request)
-                except ai_animation.AIAnimationError as exc:
-                    raise ApiError(exc.status, exc.code, str(exc)) from None
-                self._json(200, {"ok": True, "storyboard": result})
-                return
             if parsed.path == "/api/cancel":
                 self._body(0)
                 self.server.jobs.cancel(parse_qs(parsed.query).get("id", [""])[0])
