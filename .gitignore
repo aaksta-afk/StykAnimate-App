@@ -42,3 +42,6 @@ native/bin/darwin-*/
 # MSVC linker byproducts; only the DLL is used.
 native/bin/**/*.exp
 native/bin/**/*.lib
+
+# Local MCP-generated editable animation projects
+.styk-agent/

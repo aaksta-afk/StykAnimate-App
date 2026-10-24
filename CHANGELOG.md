@@ -8,6 +8,8 @@ What's new in each version of StykAnimate.
 
 ### Added
 
+- Local AI-agent control through MCP for Claude Code, Codex and Antigravity: generate, read and edit native stick-figure animations without a separate API key; use Agent Import to paste storyboard JSON.
+
 - StykAnimate is now open source: its code is on GitHub under the GPL-3.0 license.
 - Everyday Props · Pivot 3D: 30 editable everyday objects with working hinges and wheels for your animations.
 - Vehicles · Pivot 3D asset pack with twelve editable vehicles, spinning wheels, steering and opening parts.

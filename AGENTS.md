@@ -10,6 +10,12 @@ StykAnimate is a local stick animation program built on sound architecture and g
 - Keep changes focused and use existing module boundaries. Fix the owning layer instead of duplicating state or adding a second implementation of the same behavior.
 - Report the result, checks actually run, and remaining limitations concisely. Claims about builds, performance, or releases require evidence for the changed bytes.
 
+## Natural-language animation through local agents
+
+If the user asks Claude Code, Codex or Antigravity to create or revise an animation, first use the `stykanimate` MCP tools when available. Call `animation_guide` to learn the accepted storyboard structure, then `create_animation` or `read_animation`/`edit_keyframe`/`replace_animation`. Return the generated `.styk` path and explain that the user opens/reopens it via StykAnimate **File > Open**. For simple edits, preserve the user's existing choreography instead of recreating an unrelated animation.
+
+The shared local server is `scripts/styk-mcp.mjs`; the client configs are `.mcp.json`, `.codex/config.toml` and `.agents/mcp_config.json`. It does **not** call model APIs, require API credentials, or live-control the editor window. MCP output lives in the ignored `.styk-agent/animations` directory. See `docs/AI-ANIMATION.md`.
+
 ## Where to look
 
 | Concern | Start here |

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "stykanimate": {
+      "command": "node",
+      "args": [
+        "scripts/styk-mcp.mjs"
+      ],
+      "cwd": "."
+    }
+  }
+}
