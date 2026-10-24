@@ -1015,6 +1015,10 @@ class Handler(BaseHTTPRequestHandler):
             self._check_request()
             parsed = urlsplit(self.path)
             if parsed.path == "/api/ai/animate":
+                # A different loopback site must not spend this process's API credits.
+                origin = self.headers.get("Origin", "")
+                if not origin or urlsplit(origin).netloc.lower() != self.headers.get("Host", "").lower():
+                    raise ApiError(403, "ai_origin_forbidden", "AI generation requires the editor origin.")
                 try:
                     request = decoded_json(self._body(16384))
                     result = ai_animation.generate_storyboard(request)
