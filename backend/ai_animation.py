@@ -6,6 +6,7 @@ server process environment and never sent to the editor or persisted.
 from __future__ import annotations
 
 import json
+import math
 import os
 import urllib.error
 import urllib.request
@@ -89,10 +90,16 @@ def validate_storyboard(value):
                 raise AIAnimationError(502, "ai_invalid_output", "Unknown animation pose.")
             for axis, hi in (("x", 960), ("y", 540)):
                 coord = actor.get(axis)
-                if type(coord) not in (float, int) or not 0 <= coord <= hi:
+                if type(coord) not in (float, int) or not math.isfinite(coord) or not 0 <= coord <= hi:
                     raise AIAnimationError(502, "ai_invalid_output", "Actor is outside the stage.")
-            if actor.get("facing", 1) not in (-1, 1):
+            facing = actor.get("facing", 1)
+            if type(facing) is not int or facing not in (-1, 1):
                 raise AIAnimationError(502, "ai_invalid_output", "Invalid actor orientation.")
+            angles = actor.get("angles")
+            if angles is not None and (not isinstance(angles, list) or len(angles) != 10 or
+                    any(type(value) not in (float, int) or not math.isfinite(value) or
+                        not -12.6 <= value <= 12.6 for value in angles)):
+                raise AIAnimationError(502, "ai_invalid_output", "Invalid custom joint angles.")
     return {"title": title, "fps": fps, "frames": frames}
 
 
